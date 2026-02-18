@@ -81,7 +81,7 @@ export default function RequestQuotePage() {
                 <input 
                   type="range" 
                   min="10000" 
-                  max="500000" 
+                  max="1000000000" 
                   step="5000"
                   value={budget}
                   onChange={(e) => setBudget(e.target.value)}
