@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
+import Link from 'next/link'; // <--- THIS IS THE MISSING LINE
 
 export default function LoginPage() {
   const router = useRouter();
