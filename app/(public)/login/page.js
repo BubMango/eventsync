@@ -67,6 +67,10 @@ export default function LoginPage() {
             - Anything else goes to Client Dashboard.
           </div>
 
+        <p className="text-center text-[10px] text-gray-400 mt-8 uppercase tracking-widest">
+        New to EventSync? <Link href="/signup" className="text-black font-bold border-b border-black pb-0.5">Create Account</Link>
+        </p>
+
           <div>
             <button
               type="submit"
