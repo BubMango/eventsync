@@ -1,32 +1,33 @@
 import React from 'react';
+import Link from 'next/link'; // Import Link for navigation
 
 export default function PackagesPage() {
   const packageList = [
     {
-      id: 1,
+      id: "package-1", // ID matches your folder names
       title: "Package 1",
       description: "Comprehensive coordination from planning to execution for all event types in Davao City."
     },
     {
-      id: 2,
+      id: "package-2", // ID matches your folder names
       title: "Package 2",
       description: "Professional audio-visual setups including high-quality stage production and engineering."
     },
     {
-      id: 3,
-      title: "Service 1",
+      id: "package-3", // ID matches your folder names
+      title: "Package 3",
       description: "Customizable lighting designs to set the perfect mood and visibility for any venue."
     }
   ];
 
   return (
     <div className="flex flex-col min-h-screen bg-white text-gray-900">
-      {/* 1. BREADCRUMB - Matches image_7663c6.png */}
+      {/* 1. BREADCRUMB */}
       <nav className="max-w-7xl mx-auto w-full px-8 pt-12 md:px-20">
         <p className="text-[10px] text-gray-400 font-medium">Home / About</p>
       </nav>
 
-      {/* 2. HEADER - Matches image_7663c6.png */}
+      {/* 2. HEADER */}
       <header className="py-8">
         <h1 className="text-5xl font-bold text-center italic tracking-tight">
           Packages
@@ -42,7 +43,7 @@ export default function PackagesPage() {
               className="group bg-[#F3F4F6] border border-gray-100 rounded-3xl p-8 flex flex-col items-center text-center 
                          transition-all duration-300 ease-in-out hover:scale-[1.03] hover:shadow-2xl hover:bg-white"
             >
-              {/* Image Placeholder with Hover Effect - Matches image_7663c6.png */}
+              {/* Image Placeholder */}
               <div className="w-full aspect-video bg-[#D1D5DB] rounded-xl relative mb-8 overflow-hidden border border-gray-200 
                               transition-colors duration-300 group-hover:bg-gray-200">
                 <div className="absolute inset-0 flex items-center justify-center opacity-30 group-hover:opacity-50">
@@ -64,11 +65,14 @@ export default function PackagesPage() {
                 {item.description}
               </p>
 
-              {/* Transition Button - Matches image_7666ee.png hover style */}
-              <button className="bg-[#6B7280] hover:bg-black text-white text-[10px] font-bold py-3 px-12 rounded-xl 
-                                 transition-all duration-300 uppercase tracking-widest shadow-md active:scale-95">
+              {/* LINKED MORE BUTTON - Links to /[id]/page.js */}
+              <Link 
+                href={`/packages/${item.id}`}
+                className="bg-[#6B7280] hover:bg-black text-white text-[10px] font-bold py-3 px-12 rounded-xl 
+                           transition-all duration-300 uppercase tracking-widest shadow-md active:scale-95 text-center"
+              >
                 More
-              </button>
+              </Link>
             </div>
           ))}
         </div>
