@@ -101,23 +101,60 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* 3. OUR STORY TIMELINE (image_6af69f.png) */}
-      <section className="py-24 px-8 md:px-20">
-        <div className="max-w-5xl mx-auto">
-          <h2 className="text-3xl font-bold mb-16 italic border-b-2 border-black w-fit pr-10 pb-2">Our Story</h2>
-          <div className="relative border-l-2 border-gray-200 ml-4 md:ml-0 md:left-1/2 md:-translate-x-[1px]">
-            {[
-              { year: "2017", title: "The Beginning", desc: "HQ Productions was founded in Davao City." },
-              { year: "2020", title: "Growth Phase", desc: "Expanded inventory to include professional stage systems." },
-              { year: "2024", title: "EventSync Launch", desc: "Introduced digital inventory and automated scheduling." }
-            ].map((event, index) => (
-              <div key={index} className={`relative mb-20 md:w-1/2 ${index % 2 === 0 ? 'md:ml-auto md:pl-16' : 'md:mr-auto md:pr-16 md:text-right'}`}>
-                <div className="absolute top-0 -left-[9px] md:left-auto md:right-0 md:translate-x-1/2 w-4 h-4 rounded-full bg-black border-4 border-white" />
-                <span className="text-2xl font-bold italic block mb-2">{event.year}</span>
-                <h4 className="font-bold text-lg mb-2">{event.title}</h4>
-                <p className="text-sm text-gray-500">{event.desc}</p>
+      {/* 3. OUR STORY SECTION - Matches image_765ee9.png */}
+      <section className="py-24 px-8 md:px-20 bg-white">
+        <div className="max-w-6xl mx-auto">
+          {/* Section Heading */}
+          <div className="flex justify-center mb-16">
+            <h2 className="text-3xl font-bold italic border-b-2 border-black pb-2 px-4">
+              Our Story
+            </h2>
+          </div>
+          
+          <div className="relative">
+            {/* Center Vertical Line */}
+            <div className="absolute left-1/2 transform -translate-x-1/2 w-[1px] h-full bg-gray-200"></div>
+
+            {/* Timeline Events */}
+            <div className="space-y-24">
+              
+              {/* 2017 - The Beginning (Right Side) */}
+              <div className="relative flex justify-end items-start group">
+                <div className="absolute left-1/2 top-0 transform -translate-x-1/2 w-2 h-2 rounded-full bg-black z-10"></div>
+                <div className="w-[45%] pl-8">
+                  <span className="text-2xl font-bold italic block mb-1">2017</span>
+                  <h4 className="text-lg font-bold mb-2 uppercase tracking-tight">The Beginning</h4>
+                  <p className="text-xs text-gray-500 leading-relaxed">
+                    HQ Productions was founded in Davao City.
+                  </p>
+                </div>
               </div>
-            ))}
+
+              {/* 2020 - Growth Phase (Left Side) */}
+              <div className="relative flex justify-start items-start group">
+                <div className="absolute left-1/2 top-0 transform -translate-x-1/2 w-2 h-2 rounded-full bg-black z-10"></div>
+                <div className="w-[45%] pr-8 text-right">
+                  <span className="text-2xl font-bold italic block mb-1">2020</span>
+                  <h4 className="text-lg font-bold mb-2 uppercase tracking-tight">Growth Phase</h4>
+                  <p className="text-xs text-gray-500 leading-relaxed">
+                    Expanded inventory to include professional stage systems.
+                  </p>
+                </div>
+              </div>
+
+              {/* 2024 - EventSync Launch (Right Side) */}
+              <div className="relative flex justify-end items-start group">
+                <div className="absolute left-1/2 top-0 transform -translate-x-1/2 w-2 h-2 rounded-full bg-black z-10"></div>
+                <div className="w-[45%] pl-8">
+                  <span className="text-2xl font-bold italic block mb-1">2024</span>
+                  <h4 className="text-lg font-bold mb-2 uppercase tracking-tight">EventSync Launch</h4>
+                  <p className="text-xs text-gray-500 leading-relaxed">
+                    Introduced digital inventory and automated scheduling.
+                  </p>
+                </div>
+              </div>
+
+            </div>
           </div>
         </div>
       </section>
