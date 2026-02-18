@@ -7,7 +7,7 @@ export default function ContactPage() {
     <div className="flex flex-col min-h-screen bg-white text-gray-900">
       {/* 1. BREADCRUMB - Consistent with image_7663c6.png and image_7666ee.png */}
       <nav className="max-w-7xl mx-auto w-full px-8 pt-12 md:px-20">
-        <p className="text-[10px] text-gray-400 font-medium lowercase">Home / Contact Us</p>
+        <p className="text-[10px] text-gray-400 font-medium">Home / Contact Us</p>
       </nav>
 
       {/* 2. HEADER - Consistent italic styling */}
