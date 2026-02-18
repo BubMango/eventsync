@@ -2,21 +2,45 @@
 
 import React, { useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import Link from 'next/link'; // <--- THIS IS THE MISSING LINE
+import Link from 'next/link';
+import { useRouter } from 'next/navigation'; // Added missing import
 
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
-  const [role, setRole] = useState('client'); // Default for demo purposes
+  const [password, setPassword] = useState(''); // Added password state
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
-    // Logic for redirection based on Sitemap roles
-    // In a real app, this logic follows a successful API response
-    if (email.includes('admin')) {
+    // 1. Sign in with Supabase
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      alert(error.message);
+      setLoading(false);
+      return;
+    }
+
+    // 2. Fetch the user's role from your 'profiles' table
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', data.user.id)
+      .single();
+
+    // 3. Logic for redirection based on Roles
+    // This now uses the actual database role, but keeps your testing logic as a fallback
+    const userRole = profile?.role || 'client';
+
+    if (userRole === 'admin' || email.includes('admin@')) {
       router.push('/admin/dashboard');
-    } else if (email.includes('staff')) {
+    } else if (userRole === 'crew' || email.includes('staff@')) {
       router.push('/staff/dashboard');
     } else {
       router.push('/client/dashboard');
@@ -24,63 +48,59 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center bg-gray-50 px-4">
-      <div className="max-w-md w-full space-y-8 bg-white p-10 shadow-xl border border-gray-100">
+    <div className="min-h-screen flex items-center justify-center bg-white px-4">
+      <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-[40px] border border-gray-100 shadow-2xl">
         
         <div className="text-center">
-          <div className="mx-auto h-12 w-12 bg-black flex items-center justify-center text-white font-bold text-xs mb-4">
+          <div className="mx-auto h-12 w-12 bg-black flex items-center justify-center text-white font-bold text-xs mb-6 rounded-lg">
             HQ
           </div>
-          <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">
+          <h2 className="text-3xl font-bold text-gray-900 tracking-tight italic">
             Welcome Back
           </h2>
-          <p className="mt-2 text-sm text-gray-600">
+          <p className="mt-2 text-xs text-gray-400 uppercase tracking-widest">
             Log in to manage your events in EventSync
           </p>
         </div>
 
-        <form className="mt-8 space-y-6" onSubmit={handleLogin}>
-          <div className="rounded-md shadow-sm -space-y-px">
-            <div>
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-black focus:border-black focus:z-10 sm:text-sm"
-                placeholder="Email address (use 'admin@' or 'staff@' to test)"
-              />
-            </div>
-            <div>
-              <input
-                type="password"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-black focus:border-black focus:z-10 sm:text-sm"
-                placeholder="Password"
-              />
-            </div>
+        <form className="mt-8 space-y-4" onSubmit={handleLogin}>
+          <div className="space-y-2">
+            <input
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full bg-gray-50 border border-gray-200 rounded-xl px-5 py-4 text-sm outline-none focus:ring-2 focus:ring-black transition-all"
+              placeholder="Email address"
+            />
+            <input
+              type="password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full bg-gray-50 border border-gray-200 rounded-xl px-5 py-4 text-sm outline-none focus:ring-2 focus:ring-black transition-all"
+              placeholder="Password"
+            />
           </div>
 
-          <div className="bg-gray-50 p-3 rounded text-[11px] text-gray-500 border border-gray-200">
-            <strong>Testing Note:</strong> <br />
-            - Type <b>admin@test.com</b> to go to Admin Dashboard. <br />
-            - Type <b>staff@test.com</b> to go to Staff Dashboard. <br />
-            - Anything else goes to Client Dashboard.
+          <div className="bg-zinc-50 p-4 rounded-2xl text-[10px] text-gray-500 border border-gray-100 leading-relaxed uppercase tracking-tighter">
+            <span className="font-bold text-black">Staff Access:</span> <br />
+            - Use <b>admin@test.com</b> for HQ Access <br />
+            - Use <b>staff@test.com</b> for Crew Access
           </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-black text-white py-4 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-zinc-800 transition-all active:scale-95 disabled:bg-gray-400"
+          >
+            {loading ? 'Verifying...' : 'Sign in'}
+          </button>
+        </form>
 
         <p className="text-center text-[10px] text-gray-400 mt-8 uppercase tracking-widest">
-        New to EventSync? <Link href="/signup" className="text-black font-bold border-b border-black pb-0.5">Create Account</Link>
+          New to EventSync? <Link href="/signup" className="text-black font-bold border-b border-black pb-0.5 ml-1">Create Account</Link>
         </p>
-
-          <div>
-            <button
-              type="submit"
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-black hover:bg-zinc-800 transition-colors focus:outline-none"
-            >
-              Sign in
-            </button>
-          </div>
-        </form>
       </div>
     </div>
   );
