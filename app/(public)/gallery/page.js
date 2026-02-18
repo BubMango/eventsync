@@ -72,13 +72,12 @@ export default function GalleryPage() {
         </div>
       </section>
 
-      {/* 3. CALL TO ACTION */}
-      <section className="py-20 text-center bg-white border-t border-gray-100">
-        <h2 className="text-2xl font-bold italic mb-6">See our latest setups in Davao City</h2>
-        <button className="bg-black text-white px-10 py-4 text-xs font-bold uppercase tracking-[0.2em] hover:bg-zinc-800 transition-colors">
-          View More Works
+    {/* 3. CALL TO ACTION */}
+    <Link href="/gallery/all-works">
+        <button className="bg-black text-white px-10 py-4 font-bold text-[10px] uppercase tracking-[0.2em] hover:bg-zinc-800 transition-all active:scale-95">
+            View More Works
         </button>
-      </section>
+    </Link>
     </div>
   );
 }
