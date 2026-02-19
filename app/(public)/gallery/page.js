@@ -1,4 +1,6 @@
 import React from 'react';
+import Link from "next/link";
+
 
 export default function GalleryPage() {
   // Gallery items based on the "Service 1" labels in your wireframe grid
