@@ -15,54 +15,61 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
 
-    console.log("Attempting login for:", email);
+    try {
+      // 1. Authenticate user credentials
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    // 1. Authenticate user credentials
-    const { data, error: authError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+      if (authError) {
+        alert(authError.message);
+        setLoading(false);
+        return;
+      }
 
-    if (authError) {
-      alert(authError.message);
+      // 2. Fetch the role from the 'profiles' table
+      // We specifically target the 'role' column associated with the User ID
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', authData.user.id)
+        .single();
+
+      if (profileError || !profile) {
+        console.error("Profile Error:", profileError);
+        // Fallback: If no profile exists, send to client dashboard as default
+        router.push('/client/dashboard');
+        return;
+      }
+
+      // 3. Normalize role and Redirect
+      // .trim() removes spaces, .toLowerCase() handles "Admin" vs "admin"
+      const userRole = profile.role?.toLowerCase().trim();
+
+      switch (userRole) {
+        case 'admin':
+          router.push('/admin/dashboard');
+          break;
+        case 'staff':
+        case 'crew':
+          router.push('/staff/dashboard');
+          break;
+        case 'client':
+          router.push('/client/dashboard');
+          break;
+        default:
+          console.warn("Unknown role detected:", userRole);
+          router.push('/client/dashboard'); // Safety fallback
+          break;
+      }
+
+    } catch (err) {
+      console.error("Login process error:", err);
+      alert("An unexpected error occurred. Please try again.");
+    } finally {
       setLoading(false);
-      return;
     }
-
-    console.log("Auth successful! User ID:", data.user.id);
-
-    // 2. Fetch the specific role from your 'profiles' table
-    // We use .select('*') to see exactly what is being returned
-    const { data: profile, error: profileError } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', data.user.id)
-      .single();
-
-    if (profileError) {
-      console.error("Database Error:", profileError.message);
-      console.log("Falling back to client dashboard because profile couldn't be read.");
-      router.push('/client/dashboard');
-      setLoading(false);
-      return;
-    }
-
-    // 3. Strict Role-Based Redirection with Logs
-    const userRole = profile?.role?.trim().toLowerCase(); // Remove accidental spaces and fix casing
-    console.log("Role found in Database:", userRole);
-
-    if (userRole === 'admin') {
-      console.log("Redirecting to Admin HQ...");
-      router.push('/admin/dashboard');
-    } else if (userRole === 'crew' || userRole === 'staff') {
-      console.log("Redirecting to Staff Portal...");
-      router.push('/staff/dashboard');
-    } else {
-      console.log("Redirecting to Client Dashboard...");
-      router.push('/client/dashboard');
-    }
-    
-    setLoading(false);
   };
 
   return (
