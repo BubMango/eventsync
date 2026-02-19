@@ -12,151 +12,145 @@ export default function AdminDashboard() {
   useEffect(() => {
     const checkAdmin = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-
-      if (!user) {
-        router.push('/login');
-        return;
-      }
-
-      const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('full_name, role')
-        .eq('id', user.id)
-        .single();
-
-      if (error || profile?.role !== 'admin') {
-        router.push('/client/dashboard');
-        return;
-      }
-
+      if (!user) { router.push('/login'); return; }
+      const { data: profile } = await supabase.from('profiles').select('full_name, role').eq('id', user.id).single();
+      if (profile?.role !== 'admin') { router.push('/client/dashboard'); return; }
       setAdminName(profile.full_name);
       setLoading(false);
     };
-
     checkAdmin();
   }, [router]);
 
   if (loading) return (
-    <div className="flex h-96 items-center justify-center font-black italic uppercase text-xl animate-pulse">
-      Syncing HQ Data...
+    <div className="flex h-screen items-center justify-center font-black italic uppercase text-2xl animate-pulse">
+      Initialising Command Center...
     </div>
   );
 
   return (
-    <div className="space-y-10">
-      {/* HEADER SECTION */}
-      <header>
-        <h1 className="text-5xl font-black italic tracking-tighter uppercase leading-none">
-          Management <span className="text-gray-300">Overview</span>
-        </h1>
-        <p className="text-[10px] text-gray-400 mt-4 uppercase tracking-[0.3em] font-bold">
-          System Status: <span className="text-green-500">Optimal</span> • Welcome back, {adminName}
-        </p>
+    <div className="w-full space-y-8">
+      {/* 1️⃣ HEADER: UTILISING FULL WIDTH */}
+      <header className="flex justify-between items-end border-b-4 border-black pb-6">
+        <div>
+          <h1 className="text-7xl font-black italic tracking-tighter uppercase leading-[0.8]">Command</h1>
+          <p className="text-[10px] font-black uppercase tracking-[0.5em] text-gray-400 mt-4">
+            HQ Productions Operational Interface • {adminName}
+          </p>
+        </div>
+        <div className="text-right hidden md:block">
+          <p className="text-4xl font-black tracking-tighter italic">2026</p>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-green-500">System: Active</p>
+        </div>
       </header>
 
-      {/* 1️⃣ TOP KPI SUMMARY CARDS */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        {[
-          { label: "Events Today", val: "04", color: "text-black", link: "/admin/bookings" },
-          { label: "Upcoming (7d)", val: "12", color: "text-black", link: "/admin/bookings" },
-          { label: "Revenue (Mo)", val: "₱142k", color: "text-green-600", link: "/admin/payment" },
-          { label: "Conflicts", val: "02", color: "text-red-500", link: "/admin/bookings" },
-          { label: "Equipment Out", val: "85%", color: "text-black", link: "/admin/inventory" },
-          { label: "Staff Active", val: "18", color: "text-black", link: "/admin/staff" },
-        ].map((kpi, i) => (
-          <button 
-            key={i}
-            onClick={() => router.push(kpi.link)}
-            className="bg-white p-5 border border-gray-100 rounded-2xl text-left hover:shadow-xl hover:border-black transition-all group"
-          >
-            <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 group-hover:text-black">{kpi.label}</p>
-            <p className={`text-2xl font-bold tracking-tighter ${kpi.color}`}>{kpi.val}</p>
-          </button>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      {/* 2️⃣ MAIN DASHBOARD GRID (Fluid 12-Column) */}
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
         
-        {/* 2️⃣ TODAY'S EVENT TIMELINE (Center Panel) */}
-        <div className="lg:col-span-2 space-y-6">
-          <div className="flex items-center justify-between border-b border-gray-100 pb-4">
-            <h2 className="font-black uppercase text-xs tracking-widest">Today&apos;s Schedule</h2>
-            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest italic">Feb 19, 2026</span>
-          </div>
+        {/* LEFT PANEL: ONGOING & WEEKLY SCHEDULE (8 Columns) */}
+        <div className="xl:col-span-8 space-y-8">
           
-          <div className="space-y-4">
-            {/* Example Event Item */}
-            <div className="flex items-start gap-6 p-6 bg-white border border-gray-100 rounded-[32px] hover:shadow-md transition-shadow">
-              <div className="text-center min-w-[80px]">
-                <p className="font-black text-lg leading-none">18:00</p>
-                <p className="text-[9px] text-gray-400 uppercase font-bold mt-1">22:00</p>
-              </div>
-              <div className="flex-grow">
-                <div className="flex justify-between items-start">
-                  <h3 className="font-bold text-lg uppercase tracking-tight">Grand Wedding Reception</h3>
-                  <span className="bg-orange-50 text-orange-600 text-[8px] font-black px-2 py-1 rounded-full uppercase">Partial Payment</span>
-                </div>
-                <p className="text-xs text-gray-500 mt-1 italic">Davao Convention Center • 8 Crew Assigned</p>
-                <div className="flex gap-4 mt-4">
-                   <div className="flex items-center gap-1">
-                      <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                      <span className="text-[9px] font-bold uppercase text-gray-400">Gear Ready</span>
-                   </div>
-                   <div className="flex items-center gap-1 text-red-500">
-                      <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
-                      <span className="text-[9px] font-bold uppercase">Conflict Detected</span>
-                   </div>
+          {/* Ongoing Events */}
+          <section className="bg-black text-white p-8 rounded-sm">
+            <h2 className="text-[10px] font-black uppercase tracking-[0.3em] mb-6 text-zinc-500">Ongoing Events</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="border-l-2 border-green-500 pl-4">
+                <h3 className="text-2xl font-bold uppercase italic italic">Tech Expo Davao</h3>
+                <p className="text-[10px] text-zinc-400 uppercase">Convention Center • Floor 2</p>
+                <div className="mt-4 flex gap-2">
+                  <span className="text-[8px] font-black bg-zinc-800 px-2 py-1 uppercase">12 Crew</span>
+                  <span className="text-[8px] font-black bg-green-900 text-green-400 px-2 py-1 uppercase">Live</span>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
+          </section>
 
-        {/* 3️⃣ ALERTS & QUICK ACTIONS (Right Side) */}
-        <div className="space-y-8">
-          {/* Quick Actions */}
-          <section className="bg-black text-white p-8 rounded-[40px] shadow-2xl">
-            <h2 className="font-black uppercase text-[10px] tracking-widest mb-6 border-b border-zinc-800 pb-4">Quick Actions</h2>
-            <div className="grid grid-cols-1 gap-3">
-              {[
-                { label: "Create New Booking", icon: "➕" },
-                { label: "Assign Crew", icon: "👥" },
-                { label: "Add Equipment", icon: "📦" },
-                { label: "Generate Report", icon: "📄" },
-              ].map((act, i) => (
-                <button key={i} className="flex items-center justify-between w-full bg-zinc-900 hover:bg-white hover:text-black p-4 rounded-2xl text-[10px] font-bold uppercase tracking-widest transition-all">
-                  {act.label} <span>{act.icon}</span>
-                </button>
+          {/* Events This Week */}
+          <section>
+            <h2 className="text-xs font-black uppercase tracking-[0.2em] mb-4">Events This Week</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {['Fri, Feb 20 - Gala Night', 'Sat, Feb 21 - Wedding', 'Sun, Feb 22 - Concert'].map((item, i) => (
+                <div key={i} className="border border-gray-100 p-6 hover:border-black transition-all group">
+                  <p className="text-[9px] font-black text-gray-400 uppercase mb-2 group-hover:text-black">{item.split(' - ')[0]}</p>
+                  <h4 className="text-sm font-black uppercase italic tracking-tight">{item.split(' - ')[1]}</h4>
+                </div>
               ))}
             </div>
           </section>
 
-          {/* Alerts Panel */}
-          <section className="bg-white border border-gray-100 p-8 rounded-[40px]">
-            <h2 className="font-black uppercase text-[10px] tracking-widest mb-6 text-red-500">Critical Alerts</h2>
-            <div className="space-y-4">
-              <div className="p-4 bg-red-50 rounded-2xl border border-red-100">
-                <p className="text-[10px] font-black text-red-600 uppercase tracking-tighter">Double Booking Attempt</p>
-                <p className="text-[9px] text-red-400 mt-1 uppercase">Hall B - March 12</p>
-              </div>
-              <div className="p-4 bg-yellow-50 rounded-2xl border border-yellow-100">
-                <p className="text-[10px] font-black text-yellow-700 uppercase tracking-tighter">Low Inventory</p>
-                <p className="text-[9px] text-yellow-600 mt-1 uppercase">Wireless Mics (2 left)</p>
+          {/* To-Do List and Meetings */}
+          <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-zinc-50 p-6 border border-zinc-200">
+              <h2 className="text-[10px] font-black uppercase tracking-widest mb-4">Immediate To-Do</h2>
+              <ul className="space-y-3 text-[11px] font-bold uppercase">
+                <li className="flex gap-2"><span>[ ]</span> Verify Equipment Return #882</li>
+                <li className="flex gap-2 text-red-500"><span>[ ]</span> Finalize Staff Payroll</li>
+                <li className="flex gap-2"><span>[ ]</span> Update Barcode Master List</li>
+              </ul>
+            </div>
+            <div className="bg-white p-6 border border-zinc-200">
+              <h2 className="text-[10px] font-black uppercase tracking-widest mb-4">Meetings Today</h2>
+              <div className="space-y-3">
+                <p className="text-[11px] font-bold uppercase">14:00 • Client: Franccizca</p>
+                <p className="text-[11px] font-bold uppercase">16:30 • Venue Site Inspection</p>
               </div>
             </div>
           </section>
         </div>
-      </div>
 
-      {/* 4️⃣ MINI ANALYTICS SNAPSHOT */}
-      <section className="pt-10 border-t border-gray-100">
-        <h2 className="font-black uppercase text-xs tracking-widest mb-8">Performance Snapshot</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-           <div className="h-32 bg-gray-50 rounded-3xl flex items-center justify-center text-[10px] uppercase font-black text-gray-300"> Revenue Trend Graph </div>
-           <div className="h-32 bg-gray-50 rounded-3xl flex items-center justify-center text-[10px] uppercase font-black text-gray-300"> Equipment Usage Rate </div>
-           <div className="h-32 bg-gray-50 rounded-3xl flex items-center justify-center text-[10px] uppercase font-black text-gray-300"> Staff Workload </div>
+        {/* RIGHT PANEL: LOGISTICS & ALERTS (4 Columns) */}
+        <div className="xl:col-span-4 space-y-6">
+          
+          {/* Notification Panel (Conflicts/Alerts) */}
+          <section className="bg-white border-[3px] border-black p-6">
+            <h2 className="text-xs font-black uppercase tracking-widest mb-6 bg-black text-white px-2 py-1 inline-block">Alert System</h2>
+            <div className="space-y-4 divide-y divide-gray-100">
+              <div className="pt-2">
+                <p className="text-[9px] font-black text-red-500 uppercase">Conflict Detected</p>
+                <p className="text-[11px] font-bold uppercase underline italic">Double Booking: Hall B / Mar 12</p>
+              </div>
+              <div className="pt-4">
+                <p className="text-[9px] font-black text-black uppercase">Barcode Scan Log</p>
+                <p className="text-[11px] font-medium uppercase text-gray-400">Scanner #2: Mic-014 [Deployed]</p>
+              </div>
+            </div>
+          </section>
+
+          {/* Logistics Summary */}
+          <section className="bg-zinc-900 text-white p-8">
+            <div className="space-y-8">
+              {/* Equipment */}
+              <div>
+                <h3 className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-500 mb-2">Equipment Low Availability</h3>
+                <div className="flex justify-between font-bold border-b border-zinc-800 pb-2">
+                  <span className="text-[11px] uppercase tracking-tighter">Wireless Transmitters</span>
+                  <span className="text-red-500 text-xs">02 LEFT</span>
+                </div>
+              </div>
+
+              {/* Staff */}
+              <div>
+                <h3 className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-500 mb-2">Crew Deployment</h3>
+                <div className="grid grid-cols-2 gap-4">
+                   <div><p className="text-3xl font-black">18</p><p className="text-[8px] uppercase font-bold text-green-500">Assigned</p></div>
+                   <div><p className="text-3xl font-black text-zinc-600">04</p><p className="text-[8px] uppercase font-bold text-zinc-600">Free/Unassigned</p></div>
+                </div>
+              </div>
+
+              {/* Payments */}
+              <div>
+                <h3 className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-500 mb-2">Payment Pendings</h3>
+                <p className="text-2xl font-black tracking-tighter italic">₱182,400.00</p>
+                <p className="text-[8px] font-bold uppercase text-red-500 mt-1">12 Overdue Invoices</p>
+              </div>
+            </div>
+          </section>
+
+          {/* Dashboard Quick Actions */}
+          <button className="w-full bg-white border-2 border-black py-4 text-[10px] font-black uppercase tracking-[0.3em] hover:bg-black hover:text-white transition-all">
+             Scan Equipment Barcode
+          </button>
         </div>
-      </section>
+      </div>
     </div>
   );
 }

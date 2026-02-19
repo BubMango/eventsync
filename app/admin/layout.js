@@ -14,28 +14,32 @@ export default function AdminLayout({ children }) {
   };
 
   return (
-    <div className="flex flex-col min-h-screen">
-      {/* ADMIN NAVIGATION BAR */}
-      <header className="sticky top-0 z-50 w-full bg-white border-b border-gray-100 shadow-sm">
-        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-          <Link href="/admin/dashboard" className="font-bold text-2xl tracking-tighter uppercase">
-            HQ<span className="text-gray-400 font-light text-xl italic ml-1 underline underline-offset-4 decoration-1 decoration-gray-300">Admin</span>
+    <div className="flex flex-col min-h-screen w-full overflow-x-hidden bg-white">
+      {/* FULL-WIDTH NAVIGATION */}
+      <header className="sticky top-0 z-50 w-full bg-white border-b-2 border-black">
+        <div className="w-full px-8 h-20 flex items-center justify-between">
+          <Link href="/admin/dashboard" className="font-black text-3xl tracking-tighter uppercase italic">
+            HQ<span className="text-zinc-300 not-italic ml-1">ADMIN</span>
           </Link>
 
-          {/* Nav links requested in your visual diagram */}
-          <nav className="hidden md:flex items-center space-x-8 text-[11px] uppercase tracking-widest font-bold">
-            <Link href="/admin/dashboard" className="hover:text-gray-400 transition">Dashboard</Link>
-            <Link href="/admin/bookings" className="hover:text-gray-400 transition">Bookings</Link>
-            <Link href="/admin/inventory" className="hover:text-gray-400 transition">Inventory</Link>
-            <Link href="/admin/payment" className="hover:text-gray-400 transition">Payments</Link>
-            <Link href="/admin/report" className="hover:text-gray-400 transition">Reports</Link>
-            <Link href="/admin/settings" className="hover:text-gray-400 transition">Settings</Link>
+          {/* Navigation links utilizing more horizontal space */}
+          <nav className="hidden xl:flex items-center space-x-12 text-[10px] uppercase tracking-[0.3em] font-black">
+            <Link href="/admin/dashboard" className="hover:line-through transition">Dashboard</Link>
+            <Link href="/admin/bookings" className="hover:line-through transition">Bookings</Link>
+            <Link href="/admin/inventory" className="hover:line-through transition">Inventory</Link>
+            <Link href="/admin/payment" className="hover:line-through transition">Payments</Link>
+            <Link href="/admin/report" className="hover:line-through transition">Reports</Link>
+            <Link href="/admin/settings" className="hover:line-through transition">Settings</Link>
           </nav>
 
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-6">
+            <div className="hidden md:block text-right mr-4 border-r border-zinc-200 pr-6">
+              <p className="text-[9px] font-black uppercase tracking-widest leading-none">Status</p>
+              <p className="text-[9px] text-green-500 font-bold uppercase tracking-widest mt-1">System Live</p>
+            </div>
             <button 
               onClick={handleLogout}
-              className="text-[10px] font-bold uppercase tracking-widest bg-zinc-100 px-4 py-2 rounded-sm hover:bg-zinc-200 transition"
+              className="text-[10px] font-black uppercase tracking-[0.2em] bg-black text-white px-6 py-3 rounded-none hover:bg-zinc-800 transition shadow-[4px_4px_0px_0px_rgba(212,212,212,1)]"
             >
               Logout
             </button>
@@ -43,24 +47,28 @@ export default function AdminLayout({ children }) {
         </div>
       </header>
 
-      {/* PAGE CONTENT */}
-      <main className="flex-grow bg-white">
-        <div className="max-w-7xl mx-auto px-6 py-12">
+      {/* FULL-WIDTH PAGE CONTENT */}
+      <main className="flex-grow w-full">
+        {/* Removed max-w-7xl and adjusted padding for edge-to-edge data density */}
+        <div className="w-full px-8 py-10">
           {children}
         </div>
       </main>
 
-      {/* ADMIN FOOTER (Matching landing page style) */}
-      <footer className="bg-zinc-50 border-t border-gray-200 py-12">
-        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center">
-          <div className="mb-4 md:mb-0">
-            <div className="font-bold text-sm tracking-widest uppercase">HQ PRODUCTIONS | ADMIN PANEL</div>
-            <p className="text-[10px] text-gray-400 uppercase tracking-tight mt-1">
-              Internal Management System • Davao City, Philippines
+      {/* EXPANSIVE FOOTER */}
+      <footer className="bg-black text-white py-10">
+        <div className="w-full px-8 flex flex-col md:flex-row justify-between items-center gap-6">
+          <div className="flex items-center gap-8">
+            <div className="font-black text-lg tracking-tighter uppercase italic">HQ Productions</div>
+            <div className="h-4 w-[1px] bg-zinc-700 hidden md:block"></div>
+            <p className="text-[9px] text-zinc-500 uppercase tracking-[0.3em]">
+              Operational Command Console • Davao City, PH
             </p>
           </div>
-          <div className="text-[10px] text-gray-400 uppercase tracking-widest">
-            Logged in as Administrator
+          
+          <div className="flex items-center gap-12 text-[9px] font-black uppercase tracking-[0.4em] text-zinc-500">
+            <span className="text-zinc-200">Session: Admin Verified</span>
+            <span>© 2026 Internal Use Only</span>
           </div>
         </div>
       </footer>
