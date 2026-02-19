@@ -15,6 +15,8 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
 
+    console.log("Attempting login for:", email);
+
     // 1. Authenticate user credentials
     const { data, error: authError } = await supabase.auth.signInWithPassword({
       email,
@@ -27,32 +29,40 @@ export default function LoginPage() {
       return;
     }
 
+    console.log("Auth successful! User ID:", data.user.id);
+
     // 2. Fetch the specific role from your 'profiles' table
+    // We use .select('*') to see exactly what is being returned
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('role')
+      .select('*')
       .eq('id', data.user.id)
       .single();
 
     if (profileError) {
-      console.error("Error fetching profile:", profileError.message);
-      // Fallback if profile row is missing
+      console.error("Database Error:", profileError.message);
+      console.log("Falling back to client dashboard because profile couldn't be read.");
       router.push('/client/dashboard');
       setLoading(false);
       return;
     }
 
-    // 3. Strict Role-Based Redirection
-    const userRole = profile?.role;
+    // 3. Strict Role-Based Redirection with Logs
+    const userRole = profile?.role?.trim().toLowerCase(); // Remove accidental spaces and fix casing
+    console.log("Role found in Database:", userRole);
 
     if (userRole === 'admin') {
+      console.log("Redirecting to Admin HQ...");
       router.push('/admin/dashboard');
     } else if (userRole === 'crew' || userRole === 'staff') {
+      console.log("Redirecting to Staff Portal...");
       router.push('/staff/dashboard');
     } else {
-      // All other users (clients) go here
+      console.log("Redirecting to Client Dashboard...");
       router.push('/client/dashboard');
     }
+    
+    setLoading(false);
   };
 
   return (
