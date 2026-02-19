@@ -3,46 +3,54 @@
 import React, { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation'; // Added missing import
+import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState(''); // Added password state
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
 
-    // 1. Sign in with Supabase
-    const { data, error } = await supabase.auth.signInWithPassword({
+    // 1. Authenticate user credentials
+    const { data, error: authError } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
-    if (error) {
-      alert(error.message);
+    if (authError) {
+      alert(authError.message);
       setLoading(false);
       return;
     }
 
-    // 2. Fetch the user's role from your 'profiles' table
-    const { data: profile } = await supabase
+    // 2. Fetch the specific role from your 'profiles' table
+    const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('role')
       .eq('id', data.user.id)
       .single();
 
-    // 3. Logic for redirection based on Roles
-    // This now uses the actual database role, but keeps your testing logic as a fallback
-    const userRole = profile?.role || 'client';
+    if (profileError) {
+      console.error("Error fetching profile:", profileError.message);
+      // Fallback if profile row is missing
+      router.push('/client/dashboard');
+      setLoading(false);
+      return;
+    }
 
-    if (userRole === 'admin' || email.includes('admin@')) {
+    // 3. Strict Role-Based Redirection
+    const userRole = profile?.role;
+
+    if (userRole === 'admin') {
       router.push('/admin/dashboard');
-    } else if (userRole === 'crew' || email.includes('staff@')) {
+    } else if (userRole === 'crew' || userRole === 'staff') {
       router.push('/staff/dashboard');
     } else {
+      // All other users (clients) go here
       router.push('/client/dashboard');
     }
   };
@@ -81,12 +89,6 @@ export default function LoginPage() {
               className="w-full bg-gray-50 border border-gray-200 rounded-xl px-5 py-4 text-sm outline-none focus:ring-2 focus:ring-black transition-all"
               placeholder="Password"
             />
-          </div>
-
-          <div className="bg-zinc-50 p-4 rounded-2xl text-[10px] text-gray-500 border border-gray-100 leading-relaxed uppercase tracking-tighter">
-            <span className="font-bold text-black">Staff Access:</span> <br />
-            - Use <b>admin@test.com</b> for HQ Access <br />
-            - Use <b>staff@test.com</b> for Crew Access
           </div>
 
           <button
