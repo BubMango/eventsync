@@ -24,7 +24,7 @@ export default function PackagesPage() {
     <div className="flex flex-col min-h-screen bg-white text-gray-900">
       {/* 1. BREADCRUMB */}
       <nav className="max-w-7xl mx-auto w-full px-8 pt-12 md:px-20">
-        <p className="text-[10px] text-gray-400 font-medium">Home / About</p>
+        <p className="text-[10px] uppercase text-gray-400 font-medium">Home / Packages</p>
       </nav>
 
       {/* 2. HEADER */}
