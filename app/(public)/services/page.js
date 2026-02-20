@@ -21,7 +21,7 @@ export default function ServicesPage() {
       <section className="pt-12 pb-8 px-8 md:px-20 border-b border-gray-100">
         <div className="max-w-7xl mx-auto">
           {/* Matches breadcrumb style in image_7663c6.png */}
-          <p className="text-[10px] text-gray-400 mb-2 font-medium lowercase">Home / About</p>
+          <p className="text-[10px] uppercase text-gray-400 mb-2 font-medium">Home / Services</p>
           <h1 className="text-5xl font-bold text-center italic tracking-tight">Services</h1>
         </div>
       </section>
