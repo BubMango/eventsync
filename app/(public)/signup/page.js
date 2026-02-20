@@ -1,130 +1,215 @@
 "use client";
 
 import React, { useState } from 'react';
-import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
 
-export default function SignUpPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [fullName, setFullName] = useState('');
+export default function SignupPage() {
+  const router = useRouter();
+  
+  // Form State
+  const [step, setStep] = useState(1); // 1: Details, 2: Role Selection, 3: Institution Search, 4: Institution Reg
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState({ type: '', text: '' });
+  const [error, setError] = useState(null);
 
-  const handleSignUp = async (e) => {
+  const [formData, setFormData] = useState({
+    firstName: '', middleName: '', lastName: '',
+    email: '', secondaryEmail: '', mobile: '',
+    province: '', zipCode: '', barangay: '', city: '',
+    houseNo: '', street: '',
+    password: '', confirmPassword: '',
+    clientType: 'private', // 'private' or 'institutional'
+    institutionId: null
+  });
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleCreateAccount = (e) => {
     e.preventDefault();
-    setLoading(true);
-    setMessage({ type: '', text: '' });
-
-    // 1. Create User in Supabase Auth with metadata
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: fullName,
-          role: 'client', // Sets default role for EventSync
-        },
-      },
-    });
-
-    if (error) {
-      setMessage({ type: 'error', text: error.message });
-    } else {
-      setMessage({ 
-        type: 'success', 
-        text: "Success! Please check your inbox for a verification email." 
-      });
-      // Optional: Clear form on success
-      setFullName('');
-      setEmail('');
-      setPassword('');
+    if (formData.password !== formData.confirmPassword) {
+      setError("Passwords do not match");
+      return;
     }
-    setLoading(false);
+    setStep(2); // Move to role selection
+  };
+
+  const finalizeSignup = async (type, instId = null) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const { data, error: signUpError } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            full_name: `${formData.firstName} ${formData.lastName}`,
+            role: 'client',
+            client_type: type,
+            institution_id: instId
+          }
+        }
+      });
+
+      if (signUpError) throw signUpError;
+      router.push('/client/dashboard');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-white text-gray-900 justify-center items-center px-8">
-      {/* Container matches your high-end design pattern */}
-      <div className="w-full max-w-md bg-white p-12 rounded-[40px] border border-gray-100 shadow-2xl">
+    <div className="min-h-screen bg-zinc-50 flex items-center justify-center p-6 py-20">
+      <div className="w-full max-w-4xl bg-white border-2 border-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] p-10">
         
-        {/* Branding Header */}
-        <div className="flex flex-col items-center mb-10">
-          <div className="bg-black text-white px-3 py-1.5 rounded-lg mb-4 font-black text-[10px] uppercase tracking-[0.3em]">
-            HQ
-          </div>
-          <h1 className="text-4xl font-black italic tracking-tighter text-center uppercase">
-            Join EventSync
-          </h1>
-          <p className="text-gray-400 text-[10px] uppercase tracking-widest mt-3 text-center">
-            Create an account to manage your event bookings
-          </p>
+        {/* HEADER */}
+        <div className="mb-10 text-center">
+          <h1 className="text-4xl font-black italic uppercase tracking-tighter">Join EventSync</h1>
+          <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400 mt-2">Create your mission control account</p>
         </div>
 
-        {/* Status Messages */}
-        {message.text && (
-          <div className={`mb-6 p-4 rounded-2xl text-[10px] font-bold uppercase tracking-wider text-center ${
-            message.type === 'error' ? 'bg-red-50 text-red-500 border border-red-100' : 'bg-green-50 text-green-600 border border-green-100'
-          }`}>
-            {message.text}
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-600 text-[10px] font-black uppercase tracking-widest text-center">
+            {error}
           </div>
         )}
 
-        <form onSubmit={handleSignUp} className="space-y-4">
-          <div className="space-y-1">
-            <label className="text-[9px] uppercase font-black text-gray-400 ml-1">Full Name</label>
-            <input 
-              type="text" 
-              placeholder="Juan Dela Cruz" 
-              className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-5 py-4 text-sm outline-none focus:ring-2 focus:ring-black transition-all"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              required
-            />
-          </div>
+        {/* STEP 1: PERSONAL DETAILS */}
+        {step === 1 && (
+          <form onSubmit={handleCreateAccount} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Input label="First Name" name="firstName" onChange={handleChange} required />
+              <Input label="Middle Name" name="middleName" onChange={handleChange} />
+              <Input label="Last Name" name="lastName" onChange={handleChange} required />
+            </div>
 
-          <div className="space-y-1">
-            <label className="text-[9px] uppercase font-black text-gray-400 ml-1">Email Address</label>
-            <input 
-              type="email" 
-              placeholder="juan@example.com" 
-              className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 text-sm outline-none focus:ring-2 focus:ring-black transition-all"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Input label="Primary Email" name="email" type="email" onChange={handleChange} required />
+              <Input label="Secondary Email" name="secondaryEmail" type="email" onChange={handleChange} />
+              <Input label="Mobile Number" name="mobile" onChange={handleChange} required />
+            </div>
 
-          <div className="space-y-1">
-            <label className="text-[9px] uppercase font-black text-gray-400 ml-1">Password</label>
-            <input 
-              type="password" 
-              placeholder="••••••••" 
-              className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 text-sm outline-none focus:ring-2 focus:ring-black transition-all"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
-          
-          <button 
-            disabled={loading}
-            className="w-full bg-black text-white py-5 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-zinc-800 transition-all active:scale-95 disabled:bg-gray-300 mt-4 shadow-xl"
-          >
-            {loading ? 'Creating Account...' : 'Sign Up'}
-          </button>
-        </form>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <Input label="Province" name="province" onChange={handleChange} required />
+              <Input label="Zip Code" name="zipCode" onChange={handleChange} required />
+              <Input label="Barangay" name="barangay" onChange={handleChange} required />
+              <Input label="City" name="city" onChange={handleChange} required />
+            </div>
 
-        {/* Footer Link */}
-        <div className="text-center mt-10">
-          <p className="text-[10px] text-gray-400 uppercase tracking-widest">
-            Already have an account? 
-            <Link href="/login" className="text-black font-black ml-2 hover:underline decoration-2">
-              LOGIN
-            </Link>
-          </p>
-        </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Input label="House/Building No." name="houseNo" onChange={handleChange} required />
+              <Input label="Street" name="street" onChange={handleChange} required />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-zinc-100">
+              <div className="relative">
+                <Input label="Password" name="password" type={showPassword ? "text" : "password"} onChange={handleChange} required />
+                <button 
+                  type="button" 
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-10 text-[9px] font-black uppercase tracking-tighter hover:underline"
+                >
+                  {showPassword ? "Hide" : "Show"}
+                </button>
+              </div>
+              <Input label="Retype Password" name="confirmPassword" type={showPassword ? "text" : "password"} onChange={handleChange} required />
+            </div>
+
+            <div className="flex flex-col md:flex-row gap-4 pt-6">
+              <button 
+                type="submit"
+                className="flex-1 bg-black text-white py-4 text-[11px] font-black uppercase tracking-[0.3em] hover:bg-zinc-800 transition-all shadow-[6px_6px_0px_0px_rgba(212,212,212,1)]"
+              >
+                Create Account
+              </button>
+              <button 
+                type="button"
+                onClick={() => router.push('/login')}
+                className="flex-1 border-2 border-black py-4 text-[11px] font-black uppercase tracking-[0.3em] hover:bg-zinc-100 transition-all"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        )}
+
+        {/* STEP 2: ACCOUNT TYPE SELECTION */}
+        {step === 2 && (
+          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4">
+            <h2 className="text-center text-xs font-black uppercase tracking-widest border-b pb-4">Select Account Purpose</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <SelectionCard 
+                title="Private Client" 
+                desc="Personal events, weddings, and private parties." 
+                onClick={() => finalizeSignup('private')}
+              />
+              <SelectionCard 
+                title="Institutional" 
+                desc="Corporate, Government, or Organization representative." 
+                onClick={() => setStep(3)}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* STEP 3: INSTITUTION SEARCH / REDIRECT */}
+        {step === 3 && (
+          <div className="space-y-8 text-center animate-in fade-in">
+            <h2 className="text-xs font-black uppercase tracking-widest">Institutional Registration</h2>
+            <p className="text-sm font-bold uppercase text-zinc-400">Is your company or government office already registered?</p>
+            <div className="flex flex-col md:flex-row gap-4 justify-center">
+              <button onClick={() => alert("Search Logic Here")} className="px-8 py-4 bg-black text-white text-[10px] font-black uppercase tracking-widest">Yes, Search List</button>
+              <button onClick={() => setStep(4)} className="px-8 py-4 border-2 border-black text-[10px] font-black uppercase tracking-widest">No, Register Institution</button>
+            </div>
+          </div>
+        )}
+
+        {/* STEP 4: REGISTER INSTITUTION */}
+        {step === 4 && (
+          <form className="space-y-6 animate-in fade-in">
+            <h2 className="text-center text-xs font-black uppercase tracking-widest border-b pb-4">Institution Details</h2>
+            <Input label="Institution Name" name="instName" required />
+            <Input label="Office Address" name="instAddress" required />
+            <button 
+              type="button"
+              onClick={() => finalizeSignup('institutional')}
+              className="w-full bg-black text-white py-4 text-[11px] font-black uppercase tracking-[0.3em]"
+            >
+              Finalize Registration
+            </button>
+          </form>
+        )}
       </div>
     </div>
+  );
+}
+
+// Custom Sub-Components
+function Input({ label, ...props }) {
+  return (
+    <div className="flex flex-col gap-1 w-full">
+      <label className="text-[9px] font-black uppercase tracking-widest text-zinc-400 ml-1">{label}</label>
+      <input 
+        className="border-2 border-zinc-100 bg-zinc-50 p-3 text-xs font-bold uppercase tracking-tight focus:border-black focus:outline-none transition-colors"
+        {...props}
+      />
+    </div>
+  );
+}
+
+function SelectionCard({ title, desc, onClick }) {
+  return (
+    <button 
+      onClick={onClick}
+      className="p-8 border-2 border-zinc-100 text-left hover:border-black hover:bg-zinc-50 transition-all group"
+    >
+      <h3 className="text-lg font-black italic uppercase tracking-tighter group-hover:underline decoration-2 underline-offset-4">{title}</h3>
+      <p className="text-[10px] text-zinc-400 uppercase font-bold mt-2 leading-relaxed">{desc}</p>
+    </button>
   );
 }
